@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BUILD FY27 | Human Copilot Challenge</title>
+<style>
+:root{--bg:#151719;--panel:#202326;--panel2:#262a2e;--text:#f7f7f7;--muted:#aeb4ba;--red:#e60000;--line:#363b40;--cyan:#44c2c7;--purple:#7657e8}
+*{box-sizing:border-box} html,body{height:100%;margin:0;font-family:Segoe UI,Aptos,Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+body{padding:18px 22px 20px}
+header{height:105px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--red);padding:0 4px 12px}
+.eyebrow{font:700 12px/1 Segoe UI;letter-spacing:.18em;color:var(--red);text-transform:uppercase;margin-bottom:7px}
+h1{font-size:34px;line-height:1;margin:0;letter-spacing:-.03em} .subtitle{font-size:14px;color:var(--muted);margin-top:8px}
+.status{text-align:right}.count{font-size:46px;font-weight:800;line-height:.9}.count-label{font-size:11px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-top:8px}.live{display:inline-flex;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:#dce0e3}.dot{width:9px;height:9px;background:#35d07f;border-radius:50%;box-shadow:0 0 0 5px rgba(53,208,127,.12)}
+.grid{height:calc(100% - 120px);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;padding-top:14px}
+.card{background:linear-gradient(150deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:16px 18px 14px;min-height:0;overflow:hidden;box-shadow:0 12px 28px rgba(0,0,0,.22)}
+.card-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.card-title h2{font-size:16px;margin:0;letter-spacing:.04em;text-transform:uppercase}.leader{color:var(--muted);font-size:12px}.bars{display:flex;flex-direction:column;gap:9px}.bar-row{display:grid;grid-template-columns:150px 1fr 40px;gap:10px;align-items:center}.bar-label{font-size:14px;white-space:nowrap}.track{height:18px;border-radius:9px;background:#34393e;overflow:hidden}.fill{height:100%;border-radius:9px;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .6s ease}.fill.red{background:linear-gradient(90deg,#9a0000,var(--red))}.bar-value{text-align:right;font-weight:700}
+.treemap{height:calc(100% - 36px);display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:1fr;gap:8px}.tile{border-radius:12px;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(145deg,#1a7990,#4f43d5);min-width:0;overflow:hidden}.tile strong{font-size:21px}.tile span{font-size:13px;font-weight:650;margin-top:4px;overflow-wrap:anywhere}.tile:nth-child(2n){background:linear-gradient(145deg,#236ca3,#7045dc)}.tile:nth-child(3n){background:linear-gradient(145deg,#107f82,#3959d8)}
+.cloud{position:relative;height:calc(100% - 38px);overflow:hidden}.word{position:absolute;transform:translate(-50%,-50%);font-weight:750;color:#8ddde0;white-space:nowrap;transition:all .5s ease}.word:nth-child(3n){color:#fff}.word:nth-child(4n){color:#c3b8ff}.word:nth-child(5n){color:#ff8686}
+.footer-note{position:absolute;right:22px;bottom:6px;font-size:10px;color:#697078}
+@media(max-width:1100px){h1{font-size:27px}.bar-row{grid-template-columns:120px 1fr 35px}.bar-label{font-size:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="eyebrow">Wholesale & Products</div><h1>BUILD FY27: The Human Copilot Challenge</h1><div class="subtitle">Leadership provides the prompts. The room provides the intelligence.</div></div>
+  <div class="status"><div class="count" id="total">0</div><div class="count-label">ideas submitted</div><div class="live"><span class="dot"></span><span id="updated">Live data</span></div></div>
+</header>
+<main class="grid">
+  <section class="card"><div class="card-title"><h2>Team Race</h2><span class="leader" id="teamLeader"></span></div><div class="bars" id="teamBars"></div></section>
+  <section class="card"><div class="card-title"><h2>Growth Lane Race</h2><span class="leader" id="laneLeader"></span></div><div class="treemap" id="laneMap"></div></section>
+  <section class="card"><div class="card-title"><h2>Ideas from the Room</h2></div><div class="cloud" id="ideaCloud"></div></section>
+  <section class="card"><div class="card-title"><h2>Why It Helps Growth</h2></div><div class="cloud" id="impactCloud"></div></section>
+</main>
+<div class="footer-note">Prototype polls data.json every 3 seconds</div>
+<script>
+const TEAMS=['Team Build','Team Scale','Team Thrive','Team Insight','Team Momentum','Team Impact'];
+const LANES=['Strengthen Foundations','Address Internal Conflicts','Channel Optimisation','Winning Product','Digital & AI','People'];
+function counts(items,key,all){const out=Object.fromEntries(all.map(x=>[x,0]));items.forEach(x=>out[x[key]]=(out[x[key]]||0)+1);return out}
+function bars(elId, obj, red=false){const el=document.getElementById(elId),mx=Math.max(1,...Object.values(obj));el.innerHTML=Object.entries(obj).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar-row"><div class="bar-label">${k}</div><div class="track"><div class="fill ${red?'red':''}" style="width:${v/mx*100}%"></div></div><div class="bar-value">${v}</div></div>`).join('')}
+function treemap(obj){const el=document.getElementById('laneMap'),entries=Object.entries(obj).sort((a,b)=>b[1]-a[1]),total=Math.max(1,entries.reduce((s,x)=>s+x[1],0));el.innerHTML=entries.map(([k,v],i)=>{const span=Math.max(2,Math.round(v/total*12));return `<div class="tile" style="grid-column:span ${span}"><strong>${Math.round(v/total*100)}%</strong><span>${k}</span></div>`}).join('')}
+function tokenize(items,key){const stop=new Set('the and for with from into that this will would could should help growth our more less your their each one new use using create improve better'.split(' '));const m={};items.forEach(r=>String(r[key]||'').toLowerCase().replace(/[^a-z0-9&-]+/g,' ').split(/\s+/).filter(w=>w.length>2&&!stop.has(w)).forEach(w=>m[w]=(m[w]||0)+1));return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,18)}
+function cloud(elId,words){const el=document.getElementById(elId);el.innerHTML='';const spots=[[50,50],[25,25],[72,24],[19,66],[75,68],[45,20],[47,78],[84,44],[12,42],[60,35],[35,62],[88,78],[12,82],[67,88],[35,38],[57,62],[82,13],[15,13]];const max=Math.max(1,...words.map(x=>x[1]));words.forEach(([w,n],i)=>{const s=document.createElement('span');s.className='word';s.textContent=w;s.style.left=spots[i][0]+'%';s.style.top=spots[i][1]+'%';s.style.fontSize=(18+(n/max)*28)+'px';el.appendChild(s)})}
+function lead(obj){return Object.entries(obj).sort((a,b)=>b[1]-a[1])[0]||['-',0]}
+async function refresh(){try{const r=await fetch('data.json?ts='+Date.now(),{cache:'no-store'});const d=await r.json();const rs=d.responses||[];const tc=counts(rs,'team',TEAMS),lc=counts(rs,'focusArea',LANES);document.getElementById('total').textContent=rs.length;bars('teamBars',tc);treemap(lc);cloud('ideaCloud',tokenize(rs,'idea'));cloud('impactCloud',tokenize(rs,'impact'));const tl=lead(tc),ll=lead(lc);document.getElementById('teamLeader').textContent=`Leading: ${tl[0]} (${tl[1]})`;document.getElementById('laneLeader').textContent=`Hottest: ${ll[0]} (${ll[1]})`;document.getElementById('updated').textContent='Updated '+new Date(d.updatedAt||Date.now()).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});}catch(e){document.getElementById('updated').textContent='Waiting for data.json'}}
+refresh();setInterval(refresh,3000);
+</script>
+</body></html>
